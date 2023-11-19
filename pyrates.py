@@ -8,20 +8,6 @@ def list_rates(ctx, param, value):
     first = 'EUR'
     data = requests.get(key+first)
     data = data.json()
-    rates_raw = data['rates']
-    rates = []
-
-    for x in rates_raw:
-        rates.append(x[:4])
-
-    cols = 5
-    length = len(rates)
-    rows = int(length/cols)
-
-    for i in range(rows):
-        sublist = rates[i*cols : i*cols + cols]
-        click.echo(*sublist) 
-    ctx.exit()
 
 @click.command()
 @click.option('-l', is_flag=True, callback=list_rates, expose_value=False, is_eager=True)
@@ -30,13 +16,15 @@ def list_rates(ctx, param, value):
 @click.argument('second', nargs=1, type=click.STRING)
 
 def main(amount, first, second):
-    key = "https://open.er-api.com/v6/latest/"
-    data = requests.get(key+first)
-    data = data.json()
-    rates = data['rates']
-    pair_price = float(data['rates'][second])
-    conversion = float(amount) * pair_price
-    click.echo(f'{amount:.2f} {first} is {conversion:.2f} {second}.')
+    try:
+        key = "https://open.er-api.com/v6/latest/"
+        data = requests.get(key+first)
+        data = data.json()
+        pair_price = float(data['rates'][second])
+        conversion = float(amount) * pair_price
+        click.echo(f'{amount:.2f} {first} is {conversion:.2f} {second}.')
+    except KeyError:
+        click.echo("Can't exchange that currency. Please try again.")
     
 if __name__ == '__main__':
     main()
